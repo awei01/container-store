@@ -1,0 +1,21 @@
+{
+  "name": "container-store",
+  "version": "1.0.0",
+  "description": "A simple container for dependency injection / service without `new` or `this` written in `es6` syntax.",
+  "keywords": "dependency injection service container es6",
+  "main": "Container.js",
+  "engines": {
+    "node": ">=6.4"
+  },
+  "repository": "github:awei01/container-store",
+  "scripts": {
+    "test": "node ./test.js",
+    "test-dev": "nodemon ./test.js"
+  },
+  "author": "Austin Wei",
+  "license": "ISC",
+  "devDependencies": {
+    "nodemon": "^1.18.3",
+    "roast.it": "^1.0.5"
+  }
+}
