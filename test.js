@@ -14,10 +14,11 @@ roast.it('make() called with [non-existent key] returns undefined', () => {
   return container.make('i.dont.exist') === undefined
 })
 
-roast.it('define() called with [key, value] sets key with value on container', () => {
+roast.it('define() called with [key, value] sets key with value on container and returns self', () => {
   const container = Container()
-  container.define('foo', 'foo value')
+  const self = container.define('foo', 'foo value')
   return container.make('foo') === 'foo value'
+        && self === container
 })
 roast.it('define() called with [existing key, value] throws', () => {
   const container = Container()
@@ -33,15 +34,16 @@ function factoryFn (container, param1, param2) {
   return { container, param1, param2, counter }
 }
 
-roast.it(`bind() called with [key, callback]
+roast.it(`bind() called with [key, callback] returns self
           then make() called with [args] multiple times
           calls callback with [container, ...args]
           returns callback result for every call`, () => {
   const container = Container()
-  container.bind('binder', factoryFn)
+  const self = container.bind('binder', factoryFn)
   const first = container.make('binder', 'foo', 'bar')
   const second = container.make('binder', 'foo', 'bar')
-  return first.container === container && first.param1 === 'foo' && first.param2 === 'bar' &&
+  return self === container &&
+        first.container === container && first.param1 === 'foo' && first.param2 === 'bar' &&
         first.container === second.container && first.param1 === second.param1 && first.param2 === second.param2 &&
         first.counter !== second.counter &&
         first !== second
@@ -54,16 +56,17 @@ roast.it('bind() called with [existing key, value] throws', () => {
   }, 'Container already has [foo] defined')
 })
 
-roast.it(`singleton() called with [key, callback]
+roast.it(`singleton() called with [key, callback] returns self
           then make() called with [args] multiple times
           calls callback with [container, ...args] only once
           returns same callback result`, () => {
   const container = Container()
   counter = 0
-  container.singleton('instantiator', factoryFn)
+  const self = container.singleton('instantiator', factoryFn)
   const first = container.make('instantiator', 'foo', 'bar')
   const second = container.make('instantiator', 'foo', 'bar')
-  return first.container === container && first.param1 === 'foo' && first.param2 === 'bar' &&
+  return self === container &&
+        first.container === container && first.param1 === 'foo' && first.param2 === 'bar' &&
         first.counter === 1 &&
         first === second
 })
