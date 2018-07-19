@@ -1,12 +1,14 @@
 # Container Store
-A simple container for dependency injection / service without `new` or `this` written in `es6` syntax.
+A simple container for dependency injection / service without `new` or `this` written in `es6` syntax with no dependencies.
 
 ## Install
-* `npm install --save boxy`
+* `npm install --save container-store`
 
 ## Use it
 ```
-// Create a new boxy
+const Container = require('container-store')
+
+// Create a new container
 const container = Container()
 
 // Try to make something
