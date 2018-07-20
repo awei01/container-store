@@ -17,6 +17,7 @@ function Container () {
   function _register (cache, key, value) {
     _validateKeyAvailable(key)
     cache[key] = value
+    Object.defineProperty(container, key, { get: _make.bind(null, key) })
     return container
   }
 

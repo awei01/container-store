@@ -20,6 +20,11 @@ roast.it('define() called with [key, value] sets key with value on container and
   return container.make('foo') === 'foo value'
         && self === container
 })
+roast.it('define() called with [key, value] sets key on container with value', () => {
+  const container = Container()
+  container.define('foo', 'foo value')
+  return container.foo === 'foo value'
+})
 roast.it('define() called with [existing key, value] throws', () => {
   const container = Container()
   container.define('foo', 'foo value')
@@ -48,6 +53,11 @@ roast.it(`bind() called with [key, callback] returns self
         first.counter !== second.counter &&
         first !== second
 })
+roast.it('bind() called with [key, value] sets key on container with proxy to make', () => {
+  const container = Container()
+  container.bind('foo', () => { return 'foo value' })
+  return container.foo === 'foo value'
+})
 roast.it('bind() called with [existing key, value] throws', () => {
   const container = Container()
   container.bind('foo', factoryFn)
@@ -69,6 +79,11 @@ roast.it(`singleton() called with [key, callback] returns self
         first.container === container && first.param1 === 'foo' && first.param2 === 'bar' &&
         first.counter === 1 &&
         first === second
+})
+roast.it('singleton() called with [key, value] sets key on container with proxy to make', () => {
+  const container = Container()
+  container.singleton('foo', () => { return 'foo value' })
+  return container.foo === 'foo value'
 })
 roast.it('singleton() called with [existing key, value] throws', () => {
   const container = Container()
