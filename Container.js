@@ -20,7 +20,7 @@ function Container () {
     return container
   }
 
-  container.make = function make (key, ...rest) {
+  function _make (key, ...rest) {
     /**
      * Get something out of the container
      * @param key {string} - a key to lookup on the container
@@ -43,25 +43,26 @@ function Container () {
       return _bindFns[key].apply(null, args)
     }
   }
+  Object.defineProperty(container, 'make', { value: _make })
 
   /**
    * Define a static value on container
    * @param key {string} - unique key
    * @param value {any} - whatever you want to set the key to
    */
-  container.define = _register.bind(null, _cached)
+  Object.defineProperty(container, 'define', { value: _register.bind(null, _cached) })
   /**
    * Bind a key to a particular function which will be run every time the key is made
    * @param key {string} - unique key
    * @param callback {function} - a function to be invoked on every make()
    */
-  container.bind = _register.bind(null, _bindFns)
+  Object.defineProperty(container, 'bind', { value: _register.bind(null, _bindFns) })
   /**
    * Bind a key to a particular function which will be run only once the key is made
    * @param key {string} - unique key
    * @param callback {function} - a function to be invoked for first make() and its result will be returned on subsequent make()
    */
-  container.singleton = _register.bind(null, _singletonFns)
+  Object.defineProperty(container, 'singleton', { value: _register.bind(null, _singletonFns) })
 
   return container
 }
