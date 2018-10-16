@@ -33,7 +33,8 @@ function Container () {
       // object or singleton is already _cached, return it
       return _cached[key]
     }
-    const args = [container, ...rest]
+    // always use the container and key as the first params
+    const args = [container, ...rest, key]
     if (_singletonFns[key]) {
       // we found a singleton, make it and register it
       const result = _cached[key] = _singletonFns[key].apply(null, args)
