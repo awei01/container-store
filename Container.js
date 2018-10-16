@@ -9,8 +9,12 @@ function Container () {
 
   const container = {}
 
+  function _hasKey (key) {
+    return key in _cached || key in _bindFns || key in _singletonFns
+  }
+
   function _validateKeyAvailable (key) {
-    if (key in _cached || key in _bindFns || key in _singletonFns) {
+    if (_hasKey(key)) {
       throw new Error(`Container already has [${key}] defined`)
     }
   }
@@ -46,6 +50,7 @@ function Container () {
     }
   }
   Object.defineProperty(container, 'make', { value: _make })
+  Object.defineProperty(container, 'has', { value: _hasKey })
 
   /**
    * Define a static value on container
