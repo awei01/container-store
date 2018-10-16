@@ -34,7 +34,7 @@ roast.it('define() called with [existing key, value] throws', () => {
 })
 
 let counter = 0
-function factoryFn (container, param1, param2) {
+function factoryFn (container, key, param1, param2) {
   counter++
   return { container, param1, param2, counter }
 }
@@ -99,7 +99,7 @@ roast.it('can resolve dependencies from itself', () => {
   container.bind('bar', () => {
     return 'bar value'
   })
-  container.singleton('baz', (container, ...args) => {
+  container.singleton('baz', (container, key, ...args) => {
     return args.map(container.make)
   })
   const result = container.make('baz', 'foo', 'bar')
