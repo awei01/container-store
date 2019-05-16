@@ -1,6 +1,7 @@
 # NODE
 node_modules
 package-lock.json
+yarn-error.log
 
 # SYSTEM
 .DS_Store

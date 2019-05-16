@@ -1,111 +1,130 @@
-const roast = require('roast.it')
+const test = require('ava')
 const Container = require('./Container')
 
-function expectError(cb, message) {
-  try {
-    cb()
-  } catch (e) {
-    return e.message === message
+test('make() called with [non-existent key] returns [undefined]', (t) => {
+  const container = Container()
+  t.is(container.make('i.dont.exist'), undefined)
+})
+test('make() called with [non-string key] throws', (t) => {
+  const container = Container()
+  t.throws(() => {
+    container.make(3)
+  }, 'Container cannot make without valid key')
+  t.throws(() => {
+    container.make(null)
+  }, 'Container cannot make without valid key')
+  t.throws(() => {
+    container.make([])
+  }, 'Container cannot make without valid key')
+})
+
+// define()
+test('define() with [key, value] can then make() with [key] or by property', (t) => {
+  const container = Container()
+  container.define('foo', 'foo value')
+  const bar = {}
+  container.define('bar', bar)
+
+  t.is(container.make('foo'), 'foo value')
+  t.is(container.foo, 'foo value')
+  t.is(container.make('bar'), bar)
+  t.is(container.bar, bar)
+})
+test('define() with [key, value] throws error when trying to define() with same [key]', (t) => {
+  const container = Container()
+  container.define('foo', 'foo value')
+
+  t.throws(() => {
+    container.define('foo', 'other value')
+  }, 'Container already has [foo] defined')
+})
+
+// instance()
+test('instance() with [key, non-fn] throws', (t) => {
+  const container = Container()
+
+  t.throws(() => {
+    container.instance('foo', 'other value')
+  }, 'Container instance() requires a function')
+})
+test('instance() with [key, fn] creates and returns same instance and is accessible by property', (t) => {
+  const container = Container()
+  container.instance('foo', () => {
+    return { foo: 'result' }
+  })
+
+  const result = container.make('foo')
+  t.deepEqual(result, { foo: 'result' })
+  t.is(container.make('foo'), result)
+  t.is(container.foo, result)
+})
+test(`instance() with [key, fn] on make()
+    calls fn() with this as { container, key }
+    can be passed arguments
+    does not modify fn`, (t) => {
+  const container = Container()
+  container.define('foo', 'foo value')
+  function barFn (...args) {
+    return `[${this.key}]: ${this.container.foo}: ${args.join(', ')}`
   }
-}
+  container.instance('bar', barFn)
 
-roast.it('make() called with [non-existent key] returns undefined', () => {
-  const container = Container()
-  return container.make('i.dont.exist') === undefined
+  t.is(container.make('bar', 1, 2, 3), '[bar]: foo value: 1, 2, 3')
+  t.is(barFn.container, undefined)
+  t.is(barFn.key, undefined)
 })
-
-roast.it('define() called with [key, value] sets key with value on container and returns self', () => {
+test(`instance() with [key, fn] called with make()
+    then make() called again with arguments throws`, (t) => {
   const container = Container()
-  const self = container.define('foo', 'foo value')
-  return container.make('foo') === 'foo value'
-        && self === container
-})
-roast.it('define() called with [key, value] sets key on container with value', () => {
-  const container = Container()
-  container.define('foo', 'foo value')
-  return container.foo === 'foo value'
-})
-roast.it('define() called with [existing key, value] throws', () => {
-  const container = Container()
-  container.define('foo', 'foo value')
-  return expectError(() => {
-    container.define('foo', 'new value')
-  }, 'Container already has [foo] defined')
-})
-
-let counter = 0
-function factoryFn (container, key, param1, param2) {
-  counter++
-  return { container, param1, param2, counter }
-}
-
-roast.it(`bind() called with [key, callback] returns self
-          then make() called with [args] multiple times
-          calls callback with [container, ...args]
-          returns callback result for every call`, () => {
-  const container = Container()
-  const self = container.bind('binder', factoryFn)
-  const first = container.make('binder', 'foo', 'bar')
-  const second = container.make('binder', 'foo', 'bar')
-  return self === container &&
-        first.container === container && first.param1 === 'foo' && first.param2 === 'bar' &&
-        first.container === second.container && first.param1 === second.param1 && first.param2 === second.param2 &&
-        first.counter !== second.counter &&
-        first !== second
-})
-roast.it('bind() called with [key, value] sets key on container with proxy to make', () => {
-  const container = Container()
-  container.bind('foo', () => { return 'foo value' })
-  return container.foo === 'foo value'
-})
-roast.it('bind() called with [existing key, value] throws', () => {
-  const container = Container()
-  container.bind('foo', factoryFn)
-  return expectError(() => {
-    container.bind('foo', factoryFn)
-  }, 'Container already has [foo] defined')
-})
-
-roast.it(`singleton() called with [key, callback] returns self
-          then make() called with [args] multiple times
-          calls callback with [container, ...args] only once
-          returns same callback result`, () => {
-  const container = Container()
-  counter = 0
-  const self = container.singleton('instantiator', factoryFn)
-  const first = container.make('instantiator', 'foo', 'bar')
-  const second = container.make('instantiator', 'foo', 'bar')
-  return self === container &&
-        first.container === container && first.param1 === 'foo' && first.param2 === 'bar' &&
-        first.counter === 1 &&
-        first === second
-})
-roast.it('singleton() called with [key, value] sets key on container with proxy to make', () => {
-  const container = Container()
-  container.singleton('foo', () => { return 'foo value' })
-  return container.foo === 'foo value'
-})
-roast.it('singleton() called with [existing key, value] throws', () => {
-  const container = Container()
-  container.singleton('foo', factoryFn)
-  return expectError(() => {
-    container.singleton('foo', factoryFn)
-  }, 'Container already has [foo] defined')
-})
-
-roast.it('can resolve dependencies from itself', () => {
-  const container = Container()
-  container.define('foo', 'foo value')
-  container.bind('bar', () => {
+  container.instance('bar', () => {
     return 'bar value'
   })
-  container.singleton('baz', (container, key, ...args) => {
-    return args.map(container.make)
-  })
-  const result = container.make('baz', 'foo', 'bar')
-  return result.length === 2 &&
-        result[0] === 'foo value' && result[1] === 'bar value'
+  container.make('bar')
+
+  t.throws(() => {
+    container.make('bar', 1, 2, 3)
+  }, 'Container already made instance of [bar]')
 })
 
-roast.run()
-roast.exit()
+// factory()
+test('factory() with [key, non-fn] throws', (t) => {
+  const container = Container()
+
+  t.throws(() => {
+    container.factory('foo', 'other value')
+  }, 'Container factory() requires a function')
+})
+test('factory() with [key, fn] returns new instance on make()', (t) => {
+  const container = Container()
+  container.factory('foo', () => {
+    return { foo: 'result' }
+  })
+
+  const result = container.make('foo')
+  t.deepEqual(result, { foo: 'result' })
+  t.not(container.make('foo'), result)
+})
+test('factory() with [key, fn] throws on property access', (t) => {
+  const container = Container()
+  container.factory('foo', () => {
+    return { foo: 'result' }
+  })
+  t.throws(() => {
+    container.foo
+  }, 'Container [foo] is a factory and cannot be accessed by property')
+})
+test(`factory() with [key, fn] on make()
+    calls fn() with this as { container, key }
+    can be passed arguments
+    does not modify fn`, (t) => {
+  const container = Container()
+  container.define('foo', 'foo value')
+  function barFn (...args) {
+    return `[${this.key}]: ${this.container.foo}: ${args.join(', ')}`
+  }
+  container.factory('bar', barFn)
+
+  t.is(container.make('bar', 1, 2, 3), '[bar]: foo value: 1, 2, 3')
+  t.is(barFn.container, undefined)
+  t.is(barFn.key, undefined)
+})

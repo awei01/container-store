@@ -9,14 +9,14 @@
   },
   "repository": "github:awei01/container-store",
   "scripts": {
-    "test": "node ./test.js",
-    "test-dev": "nodemon ./test.js"
+    "test": "ava",
+    "test-watch": "ava --watch"
   },
   "author": "Austin Wei",
   "license": "ISC",
   "devDependencies": {
-    "nodemon": "^1.18.3",
-    "roast.it": "^1.0.5"
+    "ava": "^1.4.1",
+    "nodemon": "^1.19.0"
   },
   "dependencies": {}
 }
