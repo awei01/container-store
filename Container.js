@@ -60,10 +60,16 @@ function Container () {
     }
   }
 
+  function _substitute (key, value) {
+    if (!_hasKey(key)) { throw new Error(`Cannot substitute [${key}] as it has not been defined`) }
+    _cached[key] = value
+  }
+
   Object.defineProperty(container, 'make', { value: _make })
-  Object.defineProperty(container, 'define', { value: _register.bind(null, _cached, false) })
+  Object.defineProperty(container, 'value', { value: _register.bind(null, _cached, false) })
   Object.defineProperty(container, 'instance', { value: _register.bind(null, _instanceFns, 'instance') })
   Object.defineProperty(container, 'factory', { value: _register.bind(null, _factoryFns, 'factory') })
+  Object.defineProperty(container, 'substitute', { value: _substitute })
 
   return container
 }

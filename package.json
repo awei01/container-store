@@ -9,13 +9,14 @@
   },
   "repository": "github:awei01/container-store",
   "scripts": {
-    "test": "ava",
-    "test-watch": "ava --watch"
+    "test": "jest",
+    "test-dev": "jest --watchAll"
   },
   "author": "Austin Wei",
   "license": "ISC",
   "devDependencies": {
     "ava": "^1.4.1",
+    "jest": "^24.8.0",
     "nodemon": "^1.19.0"
   },
   "dependencies": {}
