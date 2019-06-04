@@ -1,6 +1,6 @@
 {
   "name": "container-store",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "A simple container for dependency injection / service without `new` or `this` written in `es6` syntax with no dependencies.",
   "keywords": "dependency injection service container es6",
   "main": "Container.js",
