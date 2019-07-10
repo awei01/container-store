@@ -48,6 +48,7 @@ describe('Container()', () => {
       const container = Container()
       container.value('foo', 'foo value')
       expect(Object.keys(container)).toEqual(['foo'])
+      expect(Object.assign({}, container)).toEqual({ foo: 'foo value' })
     })
   })
 
@@ -103,6 +104,7 @@ describe('Container()', () => {
         return 'bar value'
       })
       expect(Object.keys(container)).toEqual(['bar'])
+      expect(Object.assign({}, container)).toEqual({ bar: 'bar value' })
     })
   })
 
