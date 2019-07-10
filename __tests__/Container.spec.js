@@ -44,6 +44,11 @@ describe('Container()', () => {
         container.value('foo', 'other value')
       }).toThrow('Container already has [foo] defined')
     })
+    test('it should make the key enumerable', () => {
+      const container = Container()
+      container.value('foo', 'foo value')
+      expect(Object.keys(container)).toEqual(['foo'])
+    })
   })
 
   describe('instance()', () => {
@@ -92,6 +97,13 @@ describe('Container()', () => {
         container.make('bar', 1, 2, 3)
       }).toThrow('Container already made instance of [bar]')
     })
+    test(`called with [key, fn] reveals enumerable key`, () => {
+      const container = Container()
+      container.instance('bar', () => {
+        return 'bar value'
+      })
+      expect(Object.keys(container)).toEqual(['bar'])
+    })
   })
 
   describe('factory()', () => {
@@ -112,14 +124,19 @@ describe('Container()', () => {
       expect(result).toEqual({ foo: 'result' })
       expect(container.make('foo')).not.toBe(result)
     })
-    test('called with [key, fn] throws on property access', () => {
+    test('called with [key, fn] can make via property access', () => {
       const container = Container()
-      container.factory('foo', () => {
-        return { foo: 'result' }
+      container.factory('foo', (value) => {
+        return { foo: value }
       })
-      expect(() => {
-        container.foo
-      }).toThrow('Container [foo] is a factory and cannot be accessed by property')
+      expect(container.foo('value')).toEqual({ foo: 'value' })
+    })
+    test('called with [key, fn] exposes key as enumerable', () => {
+      const container = Container()
+      container.factory('foo', (value) => {
+        return { foo: value }
+      })
+      expect(Object.keys(container)).toEqual(['foo'])
     })
     test(`called with [key, fn] on make()
         calls fn() with this as { container, key }

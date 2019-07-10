@@ -20,10 +20,12 @@ function Container () {
       throw new Error(`Container ${needsFnMethod}() requires a function`)
     }
     cache[key] = value
-    Object.defineProperty(container, key, { get:
+    Object.defineProperty(container, key, { enumerable: true, get:
       cache !== _factoryFns
         ? _make.bind(null, key)
-        : () => { throw new Error(`Container [${key}] is a factory and cannot be accessed by property`) }
+        : () => {
+            return (...args) => { return _make(key, ...args) }
+          }
     })
     return container
   }
