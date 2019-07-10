@@ -138,6 +138,17 @@ describe('Container()', () => {
       })
       expect(Object.keys(container)).toEqual(['foo'])
     })
+    test('called with [key, fn] can be destructured and used', () => {
+      const container = Container()
+      container.factory('foo', (value) => {
+        return { foo: value }
+      })
+      const { foo } = container
+      expect(foo('value')).toEqual({ foo: 'value' })
+
+      const thing = { ...container }
+      expect(thing.foo('value')).toEqual({ foo: 'value' })
+    })
     test(`called with [key, fn] on make()
         calls fn() with this as { container, key }
         can be passed arguments
